@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Happy Birthday!</title>
+  <title>Happy Birthday komu!</title>
   
   <!-- Confetti Library -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -73,25 +73,24 @@
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      background: #eee;
+      background: #f8f8f8;
       padding: 6px;
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
-    /* Prank Image Frame: Fully Zoomed Out (contain) */
+    /* Prank Image Frame */
     .prank-frame {
       width: 100%;
-      height: 300px; /* Gives full space on desktop & mobile */
+      height: 300px;
       margin: 0 auto;
-      background: #f8f8f8;
     }
 
     .prank-frame img {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* ZOOMS OUT: Fits full image without cropping anything! */
+      object-fit: contain; /* Full un-cropped view */
       object-position: center;
       border-radius: 8px;
     }
@@ -134,10 +133,11 @@
       height: 140px;
     }
 
+    /* Zoom fix for real photos: fits entire photo without cropping */
     .gallery .photo-frame img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain; /* ZOOMS OUT: Fits complete photos without zooming/cropping */
       object-position: center;
       border-radius: 8px;
       transition: transform 0.3s ease;
@@ -166,17 +166,16 @@
       }
 
       .prank-frame {
-        height: 230px; /* Reduced box height for smaller mobile screens */
+        height: 230px;
       }
 
-      /* Stacks real photos into 1 column on phones so they stay clear and readable */
       .gallery {
         grid-template-columns: 1fr;
         gap: 12px;
       }
 
       .gallery .photo-frame {
-        height: 200px;
+        height: 240px; /* Gives full height space so un-cropped photos display large and clear */
       }
     }
   </style>
@@ -184,7 +183,7 @@
 <body>
 
   <main class="card">
-    <h1 id="mainTitle">Happy Birthday, Sister! 🎉</h1>
+    <h1 id="mainTitle">yeh le tera gift,lekin teko abhi nahi milega ! 🎉</h1>
     
     <!-- STEP 1: Interactive Present Box -->
     <div id="stepGift">
@@ -256,7 +255,6 @@
       const btn = document.getElementById('claimBtn');
       const hint = document.getElementById('hintText');
 
-      // Adjust movement offset based on screen width
       const moveDistance = window.innerWidth < 480 ? 40 : 80;
 
       if (clickCount === 1) {

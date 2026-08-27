@@ -22,15 +22,15 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px;
+      padding: 15px;
     }
 
     .card {
       background: rgba(255, 255, 255, 0.95);
-      padding: 30px;
+      padding: 25px 20px;
       border-radius: 20px;
       text-align: center;
-      max-width: 600px;
+      max-width: 500px;
       width: 100%;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
       position: relative;
@@ -38,18 +38,19 @@
 
     h1 {
       color: #ff4b72;
-      margin-bottom: 10px;
+      font-size: 1.8rem;
+      margin-bottom: 8px;
     }
 
     .subtitle {
       color: #555;
-      margin-bottom: 20px;
-      font-size: 1.1rem;
+      margin-bottom: 15px;
+      font-size: 1rem;
     }
 
-    /* Step 1: Shaking Present */
+    /* Step 1: Interactive Present Box */
     .gift-box {
-      font-size: 90px;
+      font-size: 80px;
       cursor: pointer;
       user-select: none;
       display: inline-block;
@@ -58,16 +59,16 @@
     }
 
     .gift-box:hover {
-      transform: scale(1.2);
+      transform: scale(1.15);
     }
 
     @keyframes bounce {
       0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-20px) rotate(-5deg); }
-      60% { transform: translateY(-10px) rotate(5deg); }
+      40% { transform: translateY(-15px) rotate(-5deg); }
+      60% { transform: translateY(-8px) rotate(5deg); }
     }
 
-    /* Photo Frame Styling */
+    /* Frame Base Styles */
     .photo-frame {
       border-radius: 12px;
       overflow: hidden;
@@ -79,18 +80,19 @@
       align-items: center;
     }
 
-    /* Fixed size container for auto-cropping */
+    /* Prank Image Frame: Fully Zoomed Out (contain) */
     .prank-frame {
       width: 100%;
-      height: 250px;
+      height: 300px; /* Gives full space on desktop & mobile */
       margin: 0 auto;
+      background: #f8f8f8;
     }
 
     .prank-frame img {
       width: 100%;
       height: 100%;
-      object-fit: cover; /* Auto-crops to fill the box without stretching */
-      object-position: center; /* Center-crops the image */
+      object-fit: contain; /* ZOOMS OUT: Fits full image without cropping anything! */
+      object-position: center;
       border-radius: 8px;
     }
 
@@ -124,29 +126,58 @@
     .gallery {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+      gap: 10px;
       margin-top: 15px;
     }
 
     .gallery .photo-frame {
-      height: 160px; /* Fixed height for auto-crop */
+      height: 140px;
     }
 
     .gallery .photo-frame img {
       width: 100%;
       height: 100%;
-      object-fit: cover; /* Auto-crops portrait and landscape images perfectly */
+      object-fit: cover;
       object-position: center;
       border-radius: 8px;
       transition: transform 0.3s ease;
     }
 
     .gallery .photo-frame img:hover {
-      transform: scale(1.08);
+      transform: scale(1.05);
     }
 
     .hidden {
       display: none !important;
+    }
+
+    /* MOBILE FRIENDLY RESPONSIVE STYLES */
+    @media (max-width: 480px) {
+      .card {
+        padding: 20px 15px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .subtitle {
+        font-size: 0.9rem;
+      }
+
+      .prank-frame {
+        height: 230px; /* Reduced box height for smaller mobile screens */
+      }
+
+      /* Stacks real photos into 1 column on phones so they stay clear and readable */
+      .gallery {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .gallery .photo-frame {
+        height: 200px;
+      }
     }
   </style>
 </head>
@@ -193,26 +224,25 @@
   <script>
     let clickCount = 0;
 
-    // Smart helper to try common extensions (.png, .jpeg, uppercase) if default fails
+    // Helper to auto-fix extension mismatches
     function handleImageError(imgElement, originalName) {
       const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.'));
       
       if (!imgElement.dataset.tried) {
         imgElement.dataset.tried = "1";
-        imgElement.src = nameWithoutExt + ".png"; // Try .png
+        imgElement.src = nameWithoutExt + ".png";
       } else if (imgElement.dataset.tried === "1") {
         imgElement.dataset.tried = "2";
-        imgElement.src = nameWithoutExt + ".jpeg"; // Try .jpeg
+        imgElement.src = nameWithoutExt + ".jpeg";
       } else if (imgElement.dataset.tried === "2") {
         imgElement.dataset.tried = "3";
-        imgElement.src = nameWithoutExt.toUpperCase() + ".JPG"; // Try UPPERCASE
+        imgElement.src = nameWithoutExt.toUpperCase() + ".JPG";
       } else {
-        // Ultimate fallback placeholder if file is missing completely
         imgElement.src = `https://via.placeholder.com/400x400/ff9a9e/fff?text=Missing+${originalName}`;
       }
     }
 
-    // Step 1: Open the box
+    // Step 1: Open present
     function openGift() {
       document.getElementById('stepGift').classList.add('hidden');
       document.getElementById('stepPrank').classList.remove('hidden');
@@ -220,17 +250,20 @@
       confetti({ particleCount: 30, spread: 50, origin: { y: 0.6 } });
     }
 
-    // Step 2: Interactive Easter Egg Button Mechanics
+    // Step 2: Running button Easter Egg logic (Mobile safe movement)
     function handleClaimClick() {
       clickCount++;
       const btn = document.getElementById('claimBtn');
       const hint = document.getElementById('hintText');
 
+      // Adjust movement offset based on screen width
+      const moveDistance = window.innerWidth < 480 ? 40 : 80;
+
       if (clickCount === 1) {
-        btn.style.transform = 'translateX(-80px)';
+        btn.style.transform = `translateX(-${moveDistance}px)`;
         hint.innerText = "Oops, it moved! Try again!";
       } else if (clickCount === 2) {
-        btn.style.transform = 'translateX(80px)';
+        btn.style.transform = `translateX(${moveDistance}px)`;
         hint.innerText = "Almost got it! One more click!";
       } else if (clickCount >= 3) {
         document.getElementById('stepPrank').classList.add('hidden');

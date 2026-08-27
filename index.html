@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Happy Birthday!</title>
   
+  <!-- Confetti Library -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
@@ -66,25 +67,36 @@
       60% { transform: translateY(-10px) rotate(5deg); }
     }
 
-    /* Common Frame Styles */
+    /* Photo Frame Styling */
     .photo-frame {
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      background: #fff;
+      background: #eee;
       padding: 6px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Fixed size container for auto-cropping */
+    .prank-frame {
+      width: 100%;
+      height: 250px;
+      margin: 0 auto;
     }
 
     .prank-frame img {
       width: 100%;
-      max-height: 250px;
-      object-fit: cover;
+      height: 100%;
+      object-fit: cover; /* Auto-crops to fill the box without stretching */
+      object-position: center; /* Center-crops the image */
       border-radius: 8px;
     }
 
     /* Interactive Big Prank Button */
     .prank-btn {
-      margin-top: 15px;
+      margin-top: 20px;
       padding: 12px 24px;
       background: #ff4b72;
       color: white;
@@ -98,7 +110,6 @@
     }
 
     .prank-btn:hover {
-      transform: scale(1.05);
       background: #e03a5f;
     }
 
@@ -117,10 +128,15 @@
       margin-top: 15px;
     }
 
+    .gallery .photo-frame {
+      height: 160px; /* Fixed height for auto-crop */
+    }
+
     .gallery .photo-frame img {
       width: 100%;
-      height: 160px;
-      object-fit: cover;
+      height: 100%;
+      object-fit: cover; /* Auto-crops portrait and landscape images perfectly */
+      object-position: center;
       border-radius: 8px;
       transition: transform 0.3s ease;
     }
@@ -139,32 +155,36 @@
   <main class="card">
     <h1 id="mainTitle">Happy Birthday, Sister! 🎉</h1>
     
+    <!-- STEP 1: Interactive Present Box -->
     <div id="stepGift">
       <p class="subtitle">Click the present to open your surprise!</p>
       <div class="gift-box" onclick="openGift()">🎁</div>
     </div>
 
+    <!-- STEP 2: Interactive Prank Screen -->
     <div id="stepPrank" class="hidden">
       <p class="subtitle">Here is your grand birthday present! Enjoy! 🧦</p>
       <div class="photo-frame prank-frame">
-        <img src="prank.jpg" alt="Prank Gift" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x250?text=Upload+prank.jpg';">
+        <img src="prank.jpg" alt="Prank Gift" onerror="handleImageError(this, 'prank.jpg')">
       </div>
       
+      <!-- Interactive Easter Egg Trick -->
       <button class="prank-btn" id="claimBtn" onclick="handleClaimClick()">Claim My Real Gift! 🎁</button>
       <p class="hint-text" id="hintText">Try clicking the button!</p>
     </div>
 
+    <!-- STEP 3: Real Gift Gallery -->
     <div id="stepRealGallery" class="hidden">
       <p class="subtitle">Just kidding! You unlocked the real memories! ❤️</p>
       <div class="gallery">
         <div class="photo-frame">
-          <img src="photo1.jpg" alt="Memory 1" onerror="this.onerror=null; this.src='https://via.placeholder.com/200x200?text=photo1.jpg';">
+          <img src="photo1.jpg" alt="Memory 1" onerror="handleImageError(this, 'photo1.jpg')">
         </div>
         <div class="photo-frame">
-          <img src="photo2.jpg" alt="Memory 2" onerror="this.onerror=null; this.src='https://via.placeholder.com/200x200?text=photo2.jpg';">
+          <img src="photo2.jpg" alt="Memory 2" onerror="handleImageError(this, 'photo2.jpg')">
         </div>
         <div class="photo-frame">
-          <img src="photo3.jpg" alt="Memory 3" onerror="this.onerror=null; this.src='https://via.placeholder.com/200x200?text=photo3.jpg';">
+          <img src="photo3.jpg" alt="Memory 3" onerror="handleImageError(this, 'photo3.jpg')">
         </div>
       </div>
     </div>
@@ -173,12 +193,30 @@
   <script>
     let clickCount = 0;
 
+    // Smart helper to try common extensions (.png, .jpeg, uppercase) if default fails
+    function handleImageError(imgElement, originalName) {
+      const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.'));
+      
+      if (!imgElement.dataset.tried) {
+        imgElement.dataset.tried = "1";
+        imgElement.src = nameWithoutExt + ".png"; // Try .png
+      } else if (imgElement.dataset.tried === "1") {
+        imgElement.dataset.tried = "2";
+        imgElement.src = nameWithoutExt + ".jpeg"; // Try .jpeg
+      } else if (imgElement.dataset.tried === "2") {
+        imgElement.dataset.tried = "3";
+        imgElement.src = nameWithoutExt.toUpperCase() + ".JPG"; // Try UPPERCASE
+      } else {
+        // Ultimate fallback placeholder if file is missing completely
+        imgElement.src = `https://via.placeholder.com/400x400/ff9a9e/fff?text=Missing+${originalName}`;
+      }
+    }
+
     // Step 1: Open the box
     function openGift() {
       document.getElementById('stepGift').classList.add('hidden');
       document.getElementById('stepPrank').classList.remove('hidden');
       
-      // Small surprise pop
       confetti({ particleCount: 30, spread: 50, origin: { y: 0.6 } });
     }
 
@@ -189,20 +227,16 @@
       const hint = document.getElementById('hintText');
 
       if (clickCount === 1) {
-        // Button runs away to the left
         btn.style.transform = 'translateX(-80px)';
         hint.innerText = "Oops, it moved! Try again!";
       } else if (clickCount === 2) {
-        // Button runs away to the right
         btn.style.transform = 'translateX(80px)';
         hint.innerText = "Almost got it! One more click!";
       } else if (clickCount >= 3) {
-        // Unlocks the real gift on 3rd click!
         document.getElementById('stepPrank').classList.add('hidden');
         document.getElementById('stepRealGallery').classList.remove('hidden');
         document.getElementById('mainTitle').innerText = "BEST SISTER EVER! 💖";
 
-        // Huge celebratory confetti cannon burst
         confetti({
           particleCount: 150,
           spread: 90,
